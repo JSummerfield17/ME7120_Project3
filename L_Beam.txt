@@ -4,6 +4,8 @@ variables
 %dt=.01;
 %t2=0.1;
 %impactime=.01;
+%bc_list=[1, 2, 14, 15];
+%bc_value_list=[0 0 0 0];
 t=0.1;
 Ixx1=1/12*(t)^4
 Ixx2=1/12*(t)^4
@@ -40,12 +42,8 @@ nodes
 points
 1 1 1 1
 
-fix pin
-1 0 0 1
-
-fix surfaceball 
-5 0 1 0
-5 0 0 1
+%Applying BCs
+%u1=u2=u14=u15=0
 
 load 
 %node# dof# load

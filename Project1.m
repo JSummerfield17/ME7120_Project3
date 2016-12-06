@@ -286,14 +286,15 @@ if strcmp(mode,'make')
    k=zeros(6,6);
   k([2 3 5 6],[2 3 5 6])=kb1;
   k([1 4],[1 4])=krod;
-k
+  a=eigs(k,6)
+
   
   % Assembling each mass matrix into the complete elemental 
   % mass matrix
   m=zeros(6,6);
   m([2 3 5 6],[2 3 5 6])=mb1;
   m([1 4],[1 4])=mrod;
-m
+b=eigs(m,6)
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %
@@ -342,7 +343,7 @@ m
   kg=lam'*k*lam;
   mg=lam'*m*lam;
 %   Trans = full(lam)
-
+kg
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %
   % Assembling matrices into global matrices
@@ -355,7 +356,23 @@ m
 
   K(indices,indices)=K(indices,indices)+kg;
   M(indices,indices)=M(indices,indices)+mg;
-  
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %Applying BCs
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  bc_list=[1, 2, 14, 15];
+bc_value_list=[0 0 0 0];
+  for i=1:length(bc_list)
+bc=bc_list(i)
+bc_value=bc_value_list(i)
+K(bc,:)=K(bc,:)*bc_value; 
+M(bc,:)=M(bc,:)*bc_value;
+K(:,bc)=K(:,bc)*bc_value; 
+M(:,bc)=M(:,bc)*bc_value;
+  end
+  K
+  M
+
 
   % At this point we also know how to draw the element (what lines
   % and surfaces exist). For the beam3 element, 2 lines are
@@ -368,7 +385,7 @@ m
   
   %If I have 4 nodes that I want to use to represent a surface, I
   %do the following.
-  panelcolor=[1 0 1];% This picks a color. You can change the
+  panelcolor=[1 0];% This picks a color. You can change the
                      % numbes between 0 and 1. 
   %Don't like this color? Use colorui to pick another one. Another
   %option is that if we can't see the elements separately we can
