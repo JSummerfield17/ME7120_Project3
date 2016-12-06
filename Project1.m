@@ -171,7 +171,7 @@ if strcmp(mode,'make')
   y3=points(bnodes(3),2);
   z3=points(bnodes(3),3);
   
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %
   % Shape functions for higher order beam. 
@@ -201,37 +201,7 @@ if strcmp(mode,'make')
   numbeamgauss=3; % Number of Gauss points for integration of beam element
   [bgpts,bgpw]=gauss(numbeamgauss);
   kb1=zeros(4,4);% For this beam, 2 nodes, 2DOF each, is a 4 by 4
-                 % matrix. 
-  kb2=kb1; %Stiffness matrix for the x-z plane beam element. 
-  l=norm([x2 y2 z2]-[x1 y1 z1]);
-  propertynum=num2str(element(elnum).properties);
-  % Allowable aspect ratio. I recommend D/l=.1
-  if isempty(DoverL)==1
-    DoverL=.1;
-  end
-  %Euler bernoulli beams must be slender. Warn if not. 
-  if sqrt(A1*4/pi)/l>DoverL|sqrt(A2*4/pi)/l>DoverL
-    warndlg({['Dimensions of element ' num2str(elnum) ' using properties '...
-	      propertynum ' are more suitable for a Timoshenko beam.'];...
-	     'radius divided by length is too large'},...
-	    'Improper application of element.','replace')
-  end
-  % This took some work, but provide bounds on other values. 
-  if (Izz1+Iyy1)<(1/2.1*A1^2/pi)|(Izz2+Iyy2)<(1/2.1*A2^2/pi)
-    %2.0 would be exact for a circle
-    warndlg({['Iyy+Izz for properties number' propertynum ' can''t be as '...
-	      'low as have been given.'];...
-	     'Nonphysical properties.'},['Impossible cross sectional' ...
-		    ' properties'],'replace')
-  end
-  slenderness=min([sqrt((Izz1+Iyy1)/A1) sqrt((Izz2+Iyy2)/A2)])/l;
-  % Check if this is a beam or something so thin that its really a
-  % string. 
-  if slenderness<.002
-    disp([num2str(elnum) ['is a rediculously thin element. Please' ...
-		    ' check numbers.']])
-  end
-  
+  l=norm([x2 y2 z2]-[x1 y1 z1]);             
   Jac=l/2;% Beam Jacobian. valid only if node three is in the
           % middle of the beam. Luck for us, it always is (or the
           % code yells at you)
@@ -252,36 +222,16 @@ if strcmp(mode,'make')
                                                % integration part
   end
                                               
-% Local Bending in x-z plane
-  for i=1:numbeamgauss
-    beamsfs=[polyval(bn1dd,bgpts(i))/Jac^2;
-             -polyval(bn2dd,bgpts(i))/Jac;
-             polyval(bn3dd,bgpts(i))/Jac^2;
-             -polyval(bn4dd,bgpts(i))/Jac];
-    Iyy=polyval(rn1*Iyy1+rn2*Iyy2,bgpts(i));
-    kb2=kb2+bgpw(i)*beamsfs*beamsfs'*Iyy*E*Jac;
-  end
-  
+
   % Local Extension in x, torsion about x
   numrodgauss=2;% Number of points to use for gauss point integration
   [rgpts,rgpw]=gauss(numrodgauss);
   krod=zeros(2,2);
-  ktor=zeros(2,2);
+ 
   for i=1:numrodgauss
     rodsfs=[polyval(rn1d,rgpts(i))/Jac;
             polyval(rn2d,rgpts(i))/Jac];
-    if (J1>(Iyy1+Izz1))|(J2>(Iyy2+Izz2))
-      if (J1>(Iyy1+Izz1))
-	disp('WARNING: J1 must be <= Iyy1+Izz1')%More checks for reality
-      end
-      if (J2>(Iyy2+Izz2))
-	disp('WARNING: J2 must be <= Iyy2+Izz2')%More checks for reality
-      end
-        disp(['Error in element properties number '... 
-	    num2str(element(elnum).properties) ...
-	    'used by element ' num2str(elnum) ' on line'...
-	    num2str(element(elnum).lineno) '.'])
-    end
+
     J=polyval(rn1*J1+rn2*J2,rgpts(i));% J at gauss point.
     A=polyval(rn1*A1+rn2*A2,rgpts(i));% A at gauss point
     krod=krod+rgpw(i)*rodsfs*rodsfs'*A*E*Jac;%Since the shape
@@ -290,7 +240,7 @@ if strcmp(mode,'make')
                                              %we are doing the rod
                                              %and torsion rod
                                              %together. 
-    ktor=ktor+rgpw(i)*rodsfs*rodsfs'*J*G*Jac;
+    
   end
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -313,48 +263,37 @@ if strcmp(mode,'make')
                                                %(OK, this was for debugging)
   end
   
-  % Local Bending in x-z plane
-  mb2=zeros(4,4);
-  for i=1:numbeamgauss
-    beamsfs=[polyval(bn1,bgpts(i));
-             -polyval(bn2,bgpts(i))*Jac;
-             polyval(bn3,bgpts(i));
-             -polyval(bn4,bgpts(i))*Jac];
-    A=polyval(rn1*A1+rn2*A2,bgpts(i));
-    mb2=mb2+bgpw(i)*beamsfs*beamsfs'*rho*A*Jac;
-  end
+  
   
   % Local Extension in x, torsion about x
   numrodgauss=numrodgauss+1; %Need more gauss points for the mass
                              %matrix. 
   [rgpts,rgpw]=gauss(numrodgauss);
   mrod=zeros(2,2); %initialize empty mass matrix
-  mtor=zeros(2,2);
+
   for i=1:numrodgauss
     rodsfs=[polyval(rn1,rgpts(i));
             polyval(rn2,rgpts(i))];
     J=polyval(rn1*(Iyy1+Izz1)+rn2*(Iyy2+Izz2),rgpts(i));
     A=polyval(rn1*A1+rn2*A2,rgpts(i));
     mrod=mrod+rgpw(i)*rodsfs*rodsfs'*A*rho*Jac;
-    mtor=mtor+rgpw(i)*rodsfs*rodsfs'*J*rho*Jac;
+   
   end
   
   % Assembling each stiffness matrix into the complete elemental 
   % stiffness matrix. We're just telling the sub-elements to be put
   % into the correct spots for the total element. 
-  k=zeros(12,12);
-  k([2 6 8 12],[2 6 8 12])=kb1;
-  k([3 5 9 11],[3 5 9 11])=kb2;
-  k([1 7],[1 7])=krod;
-  k([4 10],[4 10])=ktor;
+   k=zeros(6,6);
+  k([2 3 5 6],[2 3 5 6])=kb1;
+  k([1 4],[1 4])=krod;
+k
   
   % Assembling each mass matrix into the complete elemental 
   % mass matrix
-  m=zeros(12,12);
-  m([2 6 8 12],[2 6 8 12])=mb1;
-  m([3 5 9 11],[3 5 9 11])=mb2;
-  m([1 7],[1 7])=mrod;
-  m([4 10],[4 10])=mtor;
+  m=zeros(6,6);
+  m([2 3 5 6],[2 3 5 6])=mb1;
+  m([1 4],[1 4])=mrod;
+m
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %
@@ -385,11 +324,9 @@ if strcmp(mode,'make')
   lam2=R2perp/norm(R2perp);
   lam3=cross(lam1,lam2);
   lamloc=[lam1;lam2;lam3];
-  lam=sparse(12,12);
+  lam=sparse(6,6);
   lam(1:3,1:3)=lamloc;
   lam(4:6,4:6)=lamloc;
-  lam(7:9,7:9)=lamloc;
-  lam(10:12,10:12)=lamloc;
   
 % $$$     lam=[lamloc z z z z z;
 % $$$          z lamloc z z z z;
@@ -413,7 +350,7 @@ if strcmp(mode,'make')
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   bn1=bnodes(1);bn2=bnodes(2);
-  indices=[bn1*6+(-5:0) bn2*6+(-5:0)] ;
+  indices=[bn1*3+(-2:0) bn2*3+(-2:0)] ;
 
 
   K(indices,indices)=K(indices,indices)+kg;
