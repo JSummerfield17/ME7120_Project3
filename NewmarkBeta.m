@@ -4,14 +4,12 @@ function [ pos, vel, acc ] = NewmarkBeta( K, M, F, Beta, gamma, deltat, t )
 clc
 
 K = full(K);
-K = K(1:30,1:30);
 M = full(M);
-M = M(1:30,1:30);
 C = Damp(K);
+R = full(F);
 
 time = (0:deltat:t);
-T = size(time,2);
-R = full(F(1:30,1));
+T = length(time);
 R0 = zeros(size(R,1),size(R,2));
 
 dn = zeros(size(K,1),1); %Initial position zero
