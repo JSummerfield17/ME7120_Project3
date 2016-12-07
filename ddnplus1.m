@@ -5,7 +5,8 @@ a = (gamma/(Beta*deltat))*(dnplus1-dn);
 b = ((gamma/Beta)-1)*ddn;
 c = deltat*((gamma/(2*Beta))-1)*dd2n;
 
-ddnplus1 = a-b-c;
+ddnplus1t = a-b-c;
+ddnplus1 = real(ddnplus1t);
 
 end
 

@@ -4,7 +4,8 @@ function dd2nplus1 = dd2nplus1(Beta, deltat, dn, ddn, dd2n, dnplus1)
 a = 1/(Beta*deltat^2)*(dnplus1-dn-deltat*ddn);
 b = (1/(2*Beta)-1)*dd2n;
 
-dd2nplus1 = a-b;
+dd2nplus1t = a-b;
+dd2nplus1 = real(dd2nplus1t);
 
 end
 
