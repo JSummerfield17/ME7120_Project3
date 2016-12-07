@@ -1,7 +1,7 @@
 function C = Damp( K )
 %Finds Damping matrix from Zeta, K, M
 
-Zeta = .02; 
+Zeta = 0.02; 
 
 %Determine Mode Shapes and Eigenvalues
 [mode, lam ]= eig(K);
@@ -11,4 +11,3 @@ lam_mat = 2*Zeta*w;
 
 C = (mode')^-1*lam_mat*mode^-1;
 end
-
