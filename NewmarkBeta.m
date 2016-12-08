@@ -55,7 +55,18 @@ theta = pos(121,:);
 dtheta = vel(121,:);
 ddtheta = acc(121,:);
 hold on
-plot(time, theta);
+figure(1)
+plot(time,theta) 
+ylabel('thetaz41 (rad/s)')
+xlabel('time(s)')
+figure(2)
+plot(time,dtheta) 
+ylabel('dthetaz41 (rad/s)')
+xlabel('time(s)')
+figure(3)
+plot(time,ddtheta)
+ylabel('ddthetaz41 (rad/s)')
+xlabel('time(s)')
 
 %Working Input
 %[pos, vel, acc] = NewmarkBeta(K, M, 0.25, 0.5, 0.0001, 0.15, 0.01)
