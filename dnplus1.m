@@ -1,6 +1,6 @@
 function dnplus1 = dnplus1(Rnplus1, M, Beta, deltat, dn, ddn, dd2n, C, gamma, K )
 %Find the D_N+1 result
-a=(1/(Beta*deltat^2))*M+(gamma/(Beta*deltat))*C+K
+a=(1/(Beta*deltat^2))*M+(gamma/(Beta*deltat))*C+K;
 b=Rnplus1;
 size(M);
 size(dn);

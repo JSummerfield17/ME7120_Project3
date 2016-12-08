@@ -1,7 +1,6 @@
 variables
 %All of these actions are not the most efficient for this problem.
-t=0.01
-l=1
+t=0.1
 Ixx1=1/12*t^4
 Ixx2=1/12*(t)^4
 Iyy1=Ixx1
