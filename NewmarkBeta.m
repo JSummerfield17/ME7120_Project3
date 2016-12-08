@@ -1,12 +1,23 @@
-function [ pos, vel, acc ] = NewmarkBeta( K, M, F, Beta, gamma, deltat, t )
+function [ pos, vel, acc ] = NewmarkBeta( K, M, Beta, gamma, deltat, t )
 %%Finds displacement, velocity, acceleration using the newark beta method
 
 clc
 
+run dof_strip
+bcs = [1 2 152];
 K = full(K);
+K(stripdof,:) = [];
+K(:,stripdof) = [];
+K(bcs,:) = [];
+K(:,bcs) = [];
 M = full(M);
+M(stripdof,:) = [];
+M(:,stripdof) = [];
+M(bcs,:) = [];
+M(:,bcs) = [];
 C = Damp(K);
-R = full(F);
+R = zeros(size(K,1),1);
+R(150,1) = 100000;
 
 time = (0:deltat:t);
 T = length(time);
@@ -14,10 +25,7 @@ R0 = zeros(size(R,1),size(R,2));
 
 dn = zeros(size(K,1),1); %Initial position zero
 ddn = zeros(size(K,1),1); %Initial velocity zero
-size(M);
-size(R);
-dd2n = M\R; %F=ma
-
+dd2n = M\R; %F=ma ==  a=F/m
 
 for i = 1:T
     pos(i,:) = dn(:);

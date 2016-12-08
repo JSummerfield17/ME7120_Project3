@@ -8,6 +8,6 @@ for i = 1:nodes
     strip2 = strip1+1;
     strip3 = strip2+1;
     strip = [strip1 strip2 strip3];
-    stripdof = [stripdof strip]  
+    stripdof = [stripdof strip];    
 end
 
