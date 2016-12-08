@@ -1,7 +1,8 @@
-function [ pos, vel, acc ] = NewmarkBeta( K, M, Beta, gamma, deltat, t, tapp )
+function [ pos, vel, acc ] = NewmarkBeta( K, M, Beta, gamma, Zeta, deltat, t, tapp )
 %%Finds displacement, velocity, acceleration using the newark beta method
 
 clc
+close all
 
 run dof_strip
 %Reduce stiffness and mass from 3D to 2D by stripping displacement in z, 
@@ -20,7 +21,7 @@ M(bcs,:) = [];
 M(:,bcs) = [];
 
 %Calculate Damping and from Force Matrix
-C = Damp(K);
+C = Damps(K, Zeta);
 R = zeros(size(K,1),1);
 R(149,1) = 100000;
 
@@ -39,7 +40,7 @@ for i = 1:T
     step = time(i);
     %If still within pluck use R, else use R0
     if step <= tapp
-        Dn = dnplus1(R, M, Beta, deltat, dn, ddn, dd2n, C, gamma, K);
+        Dn = dnplus1(R, M, Beta, deltat, dn, ddn, dd2n, C, gamma, K)
     else
         Dn = dnplus1(R0, M, Beta, deltat, dn, ddn, dd2n, C, gamma, K);
     end
@@ -55,6 +56,9 @@ dtheta = vel(121,:);
 ddtheta = acc(121,:);
 hold on
 plot(time, theta);
+
+%Working Input
+%[pos, vel, acc] = NewmarkBeta(K, M, 0.25, 0.5, 0.0001, 0.15, 0.01)
 
 end
 
