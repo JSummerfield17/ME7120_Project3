@@ -1,9 +1,12 @@
-function [ pos, vel, acc ] = NewmarkBeta( K, M, Beta, gamma, deltat, t )
+function [ pos, vel, acc ] = NewmarkBeta( K, M, Beta, gamma, deltat, t, tapp )
 %%Finds displacement, velocity, acceleration using the newark beta method
 
 clc
 
 run dof_strip
+%Reduce stiffness and mass from 3D to 2D by stripping displacement in z, 
+%rotation in x and rotation in y. Apply BCS (restrain x and y 
+%at node 1 and restrain y at node 51)
 bcs = [1 2 152];
 K = full(K);
 K(stripdof,:) = [];
@@ -15,9 +18,11 @@ M(stripdof,:) = [];
 M(:,stripdof) = [];
 M(bcs,:) = [];
 M(:,bcs) = [];
+
+%Calculate Damping and from Force Matrix
 C = Damp(K);
 R = zeros(size(K,1),1);
-R(150,1) = 100000;
+R(149,1) = 100000;
 
 time = (0:deltat:t);
 T = length(time);
@@ -28,12 +33,12 @@ ddn = zeros(size(K,1),1); %Initial velocity zero
 dd2n = M\R; %F=ma ==  a=F/m
 
 for i = 1:T
-    pos(i,:) = dn(:);
-    vel(i,:) = ddn(:);
-    acc(i,:) = dd2n(:);
+    pos(:,i) = dn(:);
+    vel(:,i) = ddn(:);
+    acc(:,i) = dd2n(:);
     step = time(i);
     %If still within pluck use R, else use R0
-    if step <= t
+    if step <= tapp
         Dn = dnplus1(R, M, Beta, deltat, dn, ddn, dd2n, C, gamma, K);
     else
         Dn = dnplus1(R0, M, Beta, deltat, dn, ddn, dd2n, C, gamma, K);
@@ -44,6 +49,12 @@ for i = 1:T
     ddn = real(Ddn);
     dd2n = real(Dd2n);
 end
+
+theta = pos(121,:);
+dtheta = vel(121,:);
+ddtheta = acc(121,:);
+hold on
+plot(time, theta);
 
 end
 
