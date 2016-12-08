@@ -40,7 +40,7 @@ for i = 1:T
     step = time(i);
     %If still within pluck use R, else use R0
     if step <= tapp
-        Dn = dnplus1(R, M, Beta, deltat, dn, ddn, dd2n, C, gamma, K)
+        Dn = dnplus1(R, M, Beta, deltat, dn, ddn, dd2n, C, gamma, K);
     else
         Dn = dnplus1(R0, M, Beta, deltat, dn, ddn, dd2n, C, gamma, K);
     end
